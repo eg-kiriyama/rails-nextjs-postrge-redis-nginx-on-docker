@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./.devcontainer/Dockerfile
+    tty: true
+    volumes:
+      - ./frontend:/frontend
+    ports:
+      - "3000:3000"
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: ./.devcontainer/Dockerfile
+    volumes:
+      - ./backend:/backend
+    environment:
+      TZ: Asia/Tokyo
+      RAILS_ENV: development
+    ports:
+      - "3001:3000"
+    depends_on:
+      - db
+  db:
+    image: postgres:14.4
+    # https://cloud.google.com/sql/docs/db-versions?hl=ja
+    ports:
+      - '3143:3143'
+    volumes:
+      - dbdata:/dbdata
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+  web:
+    image: nginx:1.21.6
+    container_name: web
+    environment:
+      TZ: Asia/Tokyo
+    volumes:
+      - ./web/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./web/nginx/log:/var/log/nginx
+      - ./backend/public:/backend/public
+      - ./backend/tmp:/backend/tmp
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+  redis:
+    image: redis:7.0.8
+    ports:
+      - "3144:3144"
+
+volumes:
+  dbdata:
