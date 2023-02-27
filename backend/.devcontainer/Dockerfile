@@ -22,4 +22,4 @@ ENTRYPOINT ["entrypoint.sh"]
 
 EXPOSE 8080
 
-CMD ["rails", "server", "-e"]
+CMD ["rails", "server", "-e", "-b", "0.0.0.0"]
